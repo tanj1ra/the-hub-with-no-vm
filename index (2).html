@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="description" content="How AtomOne plans to remain a minimal hub while gno.land supplies its programmability." />
+  <title>The Hub With No VM</title>
+  <style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <meta name="theme-color" content="#161618">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="The Hub With No VM">
+  <meta property="og:description" content="How AtomOne plans to remain a minimal hub while gno.land supplies its programmability.">
+  <style>
+    :root {
+      color-scheme: dark;
+      --ink: #ededed;
+      --muted: #8a8a90;
+      --dim: #66666c;
+      --paper: #1b1b1e;
+      --paper-raised: #202024;
+      --paper-strong: #26262b;
+      --line: #2a2a2e;
+      --line-strong: #36363c;
+      --brand: #3ecf8e;
+      --brand-hover: #50e1a0;
+      --brand-soft: rgba(62, 207, 142, 0.12);
+      --brand-line: rgba(62, 207, 142, 0.32);
+    }
+
+    * { box-sizing: border-box; }
+
+    html {
+      scroll-behavior: smooth;
+      background: #161618;
+    }
+
+    body {
+      margin: 0;
+      max-width: none;
+      padding: 0;
+      hyphens: none;
+      color: var(--ink);
+      background: #161618;
+      font-family: "Geist Sans", Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 18px;
+      line-height: 1.75;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: var(--brand); text-decoration-color: var(--brand-line); text-underline-offset: 0.2em; }
+    a:hover { color: var(--brand-hover); text-decoration-color: currentColor; }
+
+    .skip-link {
+      position: absolute;
+      left: -9999px;
+      top: 0;
+    }
+
+    .skip-link:focus {
+      left: 1rem;
+      top: 1rem;
+      z-index: 10;
+      padding: 0.6rem 0.9rem;
+      color: #161618;
+      background: var(--brand);
+      border-radius: 0.4rem;
+    }
+
+    .site-nav {
+      border-bottom: 1px solid var(--line);
+      background: rgba(22, 22, 24, 0.88);
+      backdrop-filter: blur(18px);
+    }
+
+    .nav-inner {
+      width: min(1120px, calc(100% - 2rem));
+      min-height: 68px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      color: var(--ink);
+      font-size: 0.78rem;
+      font-weight: 720;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .brand-mark {
+      width: 2rem;
+      height: 2rem;
+      display: block;
+      object-fit: contain;
+    }
+
+    .article-type {
+      color: var(--dim);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .page-shell {
+      width: min(980px, calc(100% - 2rem));
+      margin: 4.5rem auto 5rem;
+    }
+
+    article {
+      position: relative;
+      overflow: hidden;
+      padding: clamp(2rem, 6vw, 5.5rem);
+      border: 1px solid var(--line);
+      border-radius: 0.9rem;
+      background: var(--paper);
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
+    }
+
+    article::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto;
+      height: 4px;
+      background: var(--brand);
+    }
+
+    h1, h2, h3 {
+      color: var(--ink);
+      font-family: "Geist Sans", Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.08;
+      text-wrap: balance;
+    }
+
+    h1 {
+      max-width: 760px;
+      margin: 0 0 1.4rem;
+      font-size: clamp(3.2rem, 8vw, 6.4rem);
+      font-weight: 820;
+      letter-spacing: -0.065em;
+    }
+
+    h1::before {
+      content: "ATOMONE × GNO.LAND";
+      display: block;
+      margin-bottom: 1.15rem;
+      color: var(--brand);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.72rem;
+      font-weight: 650;
+      letter-spacing: 0.16em;
+    }
+
+    h1 + p {
+      max-width: 760px;
+      margin: 0 0 1rem;
+      color: #b4b4b8;
+      font-family: "Geist Sans", Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: clamp(1.1rem, 2.2vw, 1.35rem);
+      line-height: 1.55;
+    }
+
+    h1 + p em { font-style: normal; }
+
+    .byline {
+      margin: 0 0 3rem;
+      color: var(--muted);
+      font-family: "Geist Sans", Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 0.75rem;
+      font-weight: 550;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .byline strong {
+      color: var(--ink);
+      font-weight: 680;
+    }
+
+    h2 {
+      margin: 4.6rem 0 1.4rem;
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 770;
+      letter-spacing: -0.04em;
+    }
+
+    h3 {
+      margin: 3.25rem 0 1rem;
+      color: var(--ink);
+      font-size: clamp(1.45rem, 3vw, 1.9rem);
+      font-weight: 730;
+      letter-spacing: -0.025em;
+    }
+
+    p, article > ul, article > ol {
+      max-width: 70ch;
+    }
+
+    p {
+      margin: 0 0 1.55rem;
+      color: #b4b4b8;
+      font-family: Charter, "Bitstream Charter", "Iowan Old Style", Georgia, serif;
+      font-size: 1.08rem;
+    }
+
+    strong { color: var(--ink); }
+
+    code {
+      padding: 0.16em 0.38em;
+      border: 1px solid var(--brand-line);
+      border-radius: 0.35rem;
+      color: var(--brand);
+      background: var(--brand-soft);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.84em;
+      white-space: break-spaces;
+    }
+
+    hr {
+      height: 1px;
+      margin: 3rem 0;
+      border: 0;
+      background: var(--line);
+    }
+
+    #in-this-article {
+      margin: 0 0 1rem;
+      color: var(--muted);
+      font-size: 0.72rem;
+      font-weight: 720;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    #in-this-article + ul {
+      margin: 0 0 3.5rem;
+      padding: 1.35rem 1.5rem 1.3rem 2.8rem;
+      border: 1px solid var(--line);
+      border-radius: 0.85rem;
+      background: var(--paper-raised);
+      columns: 2;
+      column-gap: 3rem;
+      font-family: "Geist Sans", Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 0.9rem;
+      line-height: 1.45;
+    }
+
+    #in-this-article + ul > li {
+      break-inside: avoid;
+      margin: 0.45rem 0;
+      padding-left: 0.15rem;
+    }
+
+    #in-this-article + ul ul {
+      margin: 0.4rem 0 0.55rem;
+      padding-left: 1.1rem;
+      color: var(--dim);
+    }
+
+    #in-this-article + ul a {
+      color: #b4b4b8;
+      text-decoration: none;
+    }
+
+    #in-this-article + ul a:hover { color: var(--brand-hover); }
+
+    article > hr + p::first-letter {
+      float: left;
+      margin: 0.08em 0.1em 0 0;
+      color: var(--brand);
+      font-family: "Geist Sans", Inter, ui-sans-serif, sans-serif;
+      font-size: 4.1rem;
+      font-weight: 800;
+      line-height: 0.8;
+    }
+
+    .site-footer {
+      width: min(980px, calc(100% - 2rem));
+      margin: 0 auto 3rem;
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      color: var(--dim);
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .site-footer p {
+      margin: 0;
+      font: inherit;
+      color: inherit;
+    }
+
+    @media (max-width: 680px) {
+      body { font-size: 16px; }
+      .nav-inner { min-height: 58px; }
+      .article-type { display: none; }
+      .page-shell { width: min(100% - 1rem, 980px); margin: 1rem auto 2.5rem; }
+      article { padding: 2.2rem 1.25rem 3.25rem; border-radius: 0.8rem; }
+      h1 { font-size: clamp(2.7rem, 15vw, 4.2rem); }
+      h2 { margin-top: 3.6rem; }
+      p { font-size: 1.04rem; line-height: 1.72; }
+      #in-this-article + ul { columns: 1; padding-left: 2.4rem; }
+      .site-footer { display: block; }
+      .site-footer p + p { margin-top: 0.5rem; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+    }
+  </style>
+</head>
+<body>
+<a class="skip-link" href="#article">Skip to article</a>
+<header class="site-nav">
+  <div class="nav-inner">
+    <div class="brand"><img class="brand-mark" src="https://raw.githubusercontent.com/atomone-hub/assets/main/logos/SVG/logo-white.svg" alt="AtomOne"><span>AtomOne × gno.land</span></div>
+    <span class="article-type">Architecture / Research</span>
+  </div>
+</header>
+<main class="page-shell" id="article">
+  <article>
+<h1 id="the-hub-with-no-vm">The Hub With No VM</h1>
+<p><em>How AtomOne plans to remain a minimal hub while gno.land supplies
+the programmability it deliberately leaves out.</em></p>
+<p class="byline">Written by <strong>Joseph Toba</strong> for <strong>Tanjira Validator</strong></p>
+
+<h2 id="in-this-article">In this article</h2>
+<ul>
+<li><a href="#what-atomone-is-borrowing">What AtomOne is
+borrowing</a></li>
+<li><a href="#the-wire-is-already-live">The wire is already live</a>
+<ul>
+<li><a href="#what-the-audit-caught">What the audit caught</a></li>
+<li><a href="#built-on-ibc-v2">Built on IBC v2</a></li>
+<li><a href="#it-works-and-it-has-for-a-while">It works, and it has for
+a while</a></li>
+</ul></li>
+<li><a href="#what-the-gnoland-launch-unlocks">What the gno.land launch
+unlocks</a></li>
+<li><a href="#the-part-that-has-not-been-built">The part that has not
+been built</a></li>
+<li><a href="#what-comes-next">What comes next</a></li>
+</ul>
+<hr />
+<p>Here is everything the AtomOne blockchain can do.</p>
+<p>It holds accounts and moves balances. It stakes, delegates, slashes,
+and pays rewards. It runs a governance system elaborate enough to have a
+written constitution, two DAOs with different powers, and a proposal
+deposit that adjusts itself based on demand. It mints PHOTON by burning
+ATONE. It speaks IBC.</p>
+<p>That is the whole list. The complete module set is auth, bank, mint,
+staking, slashing, distribution, gov, photon, coredaos, epochs,
+evidence, authz, feegrant, params, vesting, and the IBC stack.</p>
+<p>Read it again and notice what is missing.</p>
+<p>Search AtomOne's source for <code>wasm</code> and you get nothing.
+Search for <code>evm</code> and you get nothing. Check
+<code>go.mod</code> and there is no virtual machine dependency of any
+kind. AtomOne cannot execute a smart contract. Not "not yet," not
+"pending an upgrade." There is no module to enable and no flag to flip.
+The chain has no capacity to run user-supplied code, and nothing in the
+repository suggests anyone is building one.</p>
+<p>For a Layer 1 in this decade that is close to heresy. The entire
+competitive logic of the last five years has been that a chain is a
+platform, that a platform needs developers, and that developers need
+somewhere to deploy. Chains that launched without a VM raced to add one.
+Chains that had one raced to make it faster, cheaper, or compatible with
+somebody else's.</p>
+<p>AtomOne looked at that and declined.</p>
+<p>The official phrasing for this is hub minimalism, and AtomOne's
+founding FAQ states the position without hedging: the chain preserves
+hub minimalism precisely so that "innovative solutions, such as smart
+contracts on ICS-secured shard chains" can exist somewhere else. The hub
+does consensus, security, governance and money, holds as little attack
+surface as it can, and lets programmability live in a state machine
+whose failures cannot become its own.</p>
+<p>Jae Kwon, whose company builds the chain, puts the token side of it
+more bluntly still: "ATOM and ATONE's only utility should be staking,
+and other utilities should be offered by ICS hosted applications."</p>
+<p>If that argument sounds familiar, it should. The Cosmos Hub spent
+years circling it. Ethereum arrived at the same conclusion from the
+opposite direction, pushing execution outward into rollups because the
+base layer could not carry it. Both got there by retrofitting. AtomOne
+simply started there, which is easy to mistake for having built
+less.</p>
+<p>But a hub with no VM has an obvious problem, and it is not a subtle
+one. Programmability is where the users are. A chain that cannot host an
+application is a chain nobody has a reason to visit. Minimalism is a
+defensible engineering position and a terrible product position, unless
+you have somewhere specific for the applications to go.</p>
+<p>AtomOne has somewhere specific, and a model for how it fits
+together.</p>
+<p>The model is called the three layer cake, and each layer depends on
+the one beneath it. Layer 3 is the application, the dapp somebody
+actually uses. Layer 2 is the smart contract platform it runs on. Layer
+1 is the hosting provider that supplies consensus and security to the
+platform above. AtomOne is not trying to be all three. It is trying to
+be Layer 1, and it says so.</p>
+<p>Layer 2, for now, is gno.land.</p>
+<p>And this is where it stops looking like two chains negotiating and
+starts looking like one design. Gno.land is built by All in Bits, the
+company whose copyright notice still reads <em>dba Tendermint Inc</em>
+in the license files of the consensus engine it originally built. All in
+Bits also commissioned the audit of AtomOne's latest release. The same
+organization is building the minimal hub and the virtual machine it
+intends to borrow. Tendermint2, the engine gno.land runs, is their own
+fork of their own original.</p>
+<p>So the question is not whether these two chains will cooperate. It is
+what exactly AtomOne is borrowing, and whether the thing on the other
+end is real.</p>
+<h2 id="what-atomone-is-borrowing">What AtomOne is borrowing</h2>
+<p>Gno.land is a chain whose entire purpose is the thing AtomOne refuses
+to do.</p>
+<p>Its virtual machine runs Gno, a language that is Go in almost every
+respect that matters. Not Go-like, not Go-inspired, not a DSL with
+familiar syntax. Contracts are written with Go's type system, Go's
+standard library conventions, and Go's tooling, then executed
+deterministically on chain. The pitch is not subtle and it does not need
+to be: there is an enormous population of Go developers, and none of
+them have to learn Solidity to use this.</p>
+<p>The second design choice matters more than it first appears. Gno.land
+publishes contract source, not bytecode. A deployed realm, which is what
+gno.land calls a stateful contract, can be read on chain as the code its
+author wrote. There is no verification step, no trusting an explorer's
+claim that this bytecode was compiled from that repository. The source
+is the artifact. For a chain built by people whose stated concern is
+verifiability, that is not a convenience feature, it is the
+argument.</p>
+<p>And it exists. This is the part worth being precise about, because
+"the VM chain we plan to use" describes a lot of vapour in this
+industry.</p>
+<p>Gno.land is running right now, in three distinct forms, and blurring
+them produces nonsense. There is <code>pearl-1</code>, the current
+testnet, released in August. There is <code>gnoland1</code>, a live
+network the project calls Beta Mainnet, which has produced over three
+and a half million blocks and hosts the GNOT token distribution, though
+ordinary transfers on it remain locked. And there is a full mainnet,
+which has not launched. Anyone claiming gno.land is live and anyone
+claiming it is unlaunched can both cite something true, which is why the
+distinction has to be stated rather than assumed.</p>
+<p>What is unambiguous is that people are building on it, and the
+clearest evidence is what happens when the chain gets destroyed.</p>
+<p>Pearl launched on the 27th of August with nothing carried over.
+Balances reset to zero, every deployed contract gone, every registered
+name released. Eight days later it holds 296 contracts.</p>
+<p>Not eight days of core team demos, either. The wrapped-GNOT contract
+has been called 9,638 times by 1,143 distinct addresses. The message
+boards have 582 separate callers, the on-chain blog 575, the user
+registry 230, the naming system 228. GnoSwap redeployed its entire
+stack, pool, router, staker, position, governance, launchpad and NFT
+contracts, plus eight test tokens. A DAO runs as contracts rather than
+as a chain module. There are token factories, NFT markets, a name
+service already on its fourth revision, and a long tail of games and
+experiments.</p>
+<p>All of it is testnet. The pools hold seeded liquidity, the GNOT came
+from a faucet, and none of the balances are worth anything. That is the
+correct state for a chain that has not launched, and it means none of
+these numbers are evidence of economic traction. Anyone citing them as
+such is selling something.</p>
+<p>What they are evidence of is a developer base with muscle memory.
+Gno.land has torn down and rebuilt its testnet four times since June,
+and each time the ecosystem reassembles itself within days. That is a
+much harder thing to manufacture than a TVL figure, and a better
+predictor of what happens at mainnet than any number denominated in a
+token nobody can sell yet.</p>
+<p>Then there is the part that gives the whole arrangement away.</p>
+<p>When gno.land computed its token distribution, 23.1% of the total
+GNOT supply was allocated to holders of ATONE and PHOTON, based on a
+snapshot of AtomOne's chain state at block 6,439,117 in December 2025.
+Not a partnership allocation. Not an ecosystem fund. Close to a quarter
+of the supply, handed to the holders of a different chain's tokens,
+calculated from that chain's own ledger.</p>
+<p>That is not two projects agreeing to work together. That is one
+project treating another project's holders as its own constituency,
+before a single packet had crossed between them. The communities were
+merged by design, in the token math, well ahead of the technology.</p>
+<p>So AtomOne's bet is less exotic than it sounds. It is not renting
+programmability from a stranger. It is declining to run a VM in its own
+state machine while a sister chain, built by the same company, runs one
+deliberately, and has already handed a quarter of its supply to
+AtomOne's holders.</p>
+<p>It is also worth being accurate about how exclusive that arrangement
+is, because it is easy to overstate. The primary source is careful here:
+gno.land and AtomOne are described as "complementary and symbiotic,"
+with the division put as "gno.land solves the smart contract problem for
+all VaaS hubs, AtomOne solves the scaling problem for all smart contract
+platforms." Both halves are plural on purpose. The same document says
+outright that "gno.land is just one of many future smart contracting
+platforms, and won't be the last to scale on AtomOne," and the hosting
+model is designed to accept any application that speaks ABCI, which
+includes EVM and CosmWasm chains.</p>
+<p>So this is not a marriage. Gno.land is the first tenant of a building
+meant to hold many, and it happens to be built by the landlord. That is
+a weaker dependency than it first appears, and a more durable
+design.</p>
+<p>Which leaves exactly one thing that has to be true for any of this to
+work.</p>
+<p>The two chains have to be able to talk. Not in principle, not in a
+roadmap diagram, but in production, with cryptographic proof, over a
+connection that neither side has to trust the other to operate
+honestly.</p>
+<p>That connection exists. It has been carrying packets for months,
+across four generations of testnet, over a light client that had to be
+invented from scratch because nothing in existence could do the job.</p>
+<h2 id="the-wire-is-already-live">The wire is already live</h2>
+<p>Gno.land is not a normal Cosmos chain, and that is what makes this
+interesting.</p>
+<p>It runs Tendermint2, a fork that split from Tendermint years ago and
+was deliberately kept apart from the Cosmos SDK. Its blocks are not
+CometBFT blocks. Its headers carry different fields, hashed in a
+different order. So when AtomOne decided it wanted to talk to gno.land,
+the answer was not "configure a relayer."</p>
+<p>Ibc-go ships four light client types. One for solo machines, one for
+Tendermint chains, one for WASM-hosted clients, one for a chain talking
+to itself. Not one of them can verify a Tendermint2 header. There was
+nothing to configure, because the thing AtomOne needed did not
+exist.</p>
+<p>There is a quiet irony in that. Tendermint2 is All in Bits' fork of
+the consensus engine All in Bits originally built, the one whose
+copyright notice in these files still reads <em>dba Tendermint Inc</em>.
+The company ended up having to write a light client to read its own
+chain, because its own fork had drifted far enough from the original
+that the standard Cosmos tooling could no longer parse the blocks.
+Divergence has a cost, and someone eventually pays it in code.</p>
+<p>So they wrote it. <code>modules/10-gno</code> is a fifth client type,
+out of tree, claiming a type string nobody else uses. AtomOne took
+ibc-go's <code>07-tendermint</code> client, the code responsible for
+proving another chain really produced the block it claims to have
+produced, and rebuilt its verification around gno's header format. The
+pull request introducing it told reviewers to evaluate it by diffing
+against the original. That is the most honest possible description: the
+standard client, taken apart and reassembled around a different
+consensus engine.</p>
+<p>AtomOne now maintains a light client that exists nowhere else in the
+ecosystem, for a consensus engine exactly one chain in the world
+runs.</p>
+<p>It is worth being clear about what that buys, because "bridge" is a
+word with a bad reputation and most of it is deserved. The bridges that
+have lost hundreds of millions of dollars work by appointing a group of
+operators to watch one chain and vouch for it on another. You trust the
+operators. When the operators are compromised, the money leaves.</p>
+<p>This is the other kind. Neither chain vouches for anything. AtomOne
+verifies gno.land's blocks by checking validator signatures against a
+header chain it tracks itself, and gno.land does the same in reverse.
+There is no operator set to compromise, and no privileged party who
+could authorize a withdrawal that did not happen. Relayers move packets
+around, but a relayer cannot forge one, and a relayer going offline
+stalls the bridge rather than draining it.</p>
+<p>That is also why a bug in the light client is a serious matter rather
+than an annoyance. The light client is the entire trust model. Break it
+and you have not broken a feature, you have broken the reason anyone
+should believe the other chain at all.</p>
+<h3 id="what-the-audit-caught">What the audit caught</h3>
+<p>Oak Security reviewed AtomOne's entire v4 changeset and returned
+fifty findings. Exactly one was Critical, and it lived here.</p>
+<p>Every consensus state the client stored carried an internal tag
+reading <code>10-gno</code>. Every consensus state it derived from an
+incoming header left that tag empty, because one constructor set it and
+the other did not. The misbehaviour checker compared the two with a deep
+equality check. It never matched. Not for forged headers. Not for valid
+ones either.</p>
+<p>Sit with what that means. When that comparison fails, the client
+concludes it has seen two conflicting versions of history at the same
+height. That is the signature of validators equivocating, and the
+correct response is to freeze. So anyone could permanently freeze the
+bridge by taking a header the chain had already accepted and submitting
+it a second time. No forgery. No stolen keys. No cost beyond gas.
+Resubmit something true and the bridge stops until governance
+intervenes.</p>
+<p>Three Major findings sat beside it. Equivocation detection read the
+wrong field, comparing each block's parent hash instead of the hash
+validators actually signed, so two conflicting blocks at the same height
+always looked identical and no double-signing could ever be reported.
+The skip-ahead verifier looked validators up by their position in a list
+rather than by address, checking signatures against the wrong keys
+whenever the validator set changed between two heights. And the packet
+encoding had no way to represent a validator who simply did not sign,
+which, since nearly every real gno.land block has one, meant authentic
+headers could not survive conversion at all.</p>
+<p>All four were fixed before release. Two hardening fixes landed after,
+including a guard against a validator set with negative voting power,
+which would have made the two-thirds signing threshold negative and
+therefore satisfiable by a single signature.</p>
+<p>None of it reached production. That is the point. A bridge is a place
+where one chain agrees to believe another chain's claims about itself,
+and the whole arrangement rests on the believing being done correctly.
+This code was written, audited, broken, and repaired before it was asked
+to hold anything.</p>
+<h3 id="built-on-ibc-v2">Built on IBC v2</h3>
+<p>The other notable choice is the protocol version.</p>
+<p>In IBC as most people know it, connecting two chains is a handshake
+ceremony. Create a light client, open a connection on top of it, open a
+channel on top of that, each step a multi-message exchange both chains
+complete in lockstep. IBC v2, called Eureka, throws out the middle
+layers. No connections. No channels. Packets reference a light client
+directly and route by client ID.</p>
+<p>Eureka is not exotic. It has been live on the Cosmos Hub for a while,
+and Injective, dYdX, MANTRA and Babylon are among the chains that have
+adopted it. But it has been adopted for almost exactly one purpose,
+which is reaching Ethereum. The proportions make the point. Of the 1,513
+IBC light clients on the Cosmos Hub today, 1,504 are classic Tendermint
+clients. Nine are not. Cosmos still talks to Cosmos the old way.</p>
+<p>AtomOne and gno.land are doing something else with it. This is not an
+Ethereum on-ramp. It is two chains in the same neighbourhood choosing
+the newer protocol for a link between themselves, which is rare enough
+that the tooling has not caught up. Point a conventional IBC explorer at
+AtomOne's testnet, ask it for channels to gno.land, and it reports none.
+Completely true, and entirely beside the point. It is looking for a
+layer this bridge does not use.</p>
+<p>You can see the fingerprint in the data. The ATONE voucher on
+gno.land carries the trace <code>transfer/07-tendermint-2/uatone</code>,
+and that middle component, where classic IBC would put a channel ID, is
+a client ID instead. The bridge announces its protocol version in the
+denomination of its own tokens.</p>
+<h3 id="it-works-and-it-has-for-a-while">It works, and it has for a
+while</h3>
+<p>Thirty-three packets have crossed. Twenty-two out of AtomOne, eleven
+back, spread across four generations of gno.land testnet as that chain
+reset and renamed itself: <code>test-13</code>, then
+<code>topaz-1</code>, then <code>sapphire-1</code>, now
+<code>pearl-1</code>. The heaviest traffic ran on <code>test-13</code>.
+Pearl carries only four so far, because Pearl was released in August and
+is simply new.</p>
+<p>Every outbound packet completed its round trip. Not one is sitting
+unresolved on any client, across the bridge's entire history.</p>
+<p>An acknowledgement is not a claim. It is the receiving chain's
+confirmation, relayed back and committed into the sender's own state.
+AtomOne's testnet holds eleven of them. That is eleven times gno.land
+verified an AtomOne packet against its own light client, accepted it,
+wrote a receipt, and AtomOne verified that receipt in turn.</p>
+<p>The tokens are worthless, and they should be. Gno.land has no
+mainnet, so everything crossing this bridge is testnet supply moving
+between testnet chains. What is being proven is not value transfer. It
+is that the machinery holds, repeatedly, across four chain resets, on a
+light client someone had to invent.</p>
+<p>And there is a detail in how the two halves were built that says
+something about both chains. AtomOne's side is a Go module compiled into
+the chain binary, because AtomOne has no virtual machine and a light
+client has nowhere else to live. Gno.land's side is
+<code>r/aib/ibc/core</code>, a realm, which is to say a smart contract,
+running inside the VM like anything else.</p>
+<p>The same bridge. Consensus-layer code on one end, an application on
+the other.</p>
+<p>That asymmetry is not engineering taste. It is this whole argument,
+showing up in the shape of the wire.</p>
+<h2 id="what-the-gnoland-launch-unlocks">What the gno.land launch
+unlocks</h2>
+<p>AtomOne has already done its half, and you can check it in one
+query.</p>
+<p>When the v4 upgrade executed on mainnet in July, the handler did
+something small and easy to miss. It appended <code>10-gno</code> to the
+chain's list of permitted IBC client types. That parameter is
+governance-controlled, it is consensus state, and it is live on
+<code>atomone-1</code> right now. AtomOne's mainnet is explicitly
+configured to accept light clients for a chain running Tendermint2.</p>
+<p>Ask that same mainnet how many such clients exist and the answer is
+zero.</p>
+<p>That gap is the whole situation in miniature, and it is not neglect.
+There is nothing for a mainnet client to point at. Gno.land's mainnet
+does not exist yet. AtomOne's production chain is holding a door open
+for a chain that has not been born, and it has been holding it since
+July.</p>
+<p>What comes through that door is worth being concrete about, because
+"interoperability" is the kind of word that can mean nothing.</p>
+<p>Today ATONE has exactly two uses. You can stake it, and you can
+govern with it. PHOTON has one: it pays for gas, and the only way to
+obtain it is by burning ATONE in a one-way conversion. These are not
+limitations of the token design, they are limitations of the venue.
+There is nothing else to do with a token on a chain that cannot run
+code. No lending market can hold it, because there are no lending
+markets. No pool can price it, because there are no pools.</p>
+<p>Move those same assets into a virtual machine and they stop being
+single-purpose. ATONE becomes something a contract can hold,
+collateralize, or pool. PHOTON becomes particularly interesting, because
+a fee token whose supply can only shrink relative to ATONE is a
+genuinely unusual asset, and it has never been anywhere it could be
+traded against anything by a program rather than an order book. Gno.land
+already has a working DEX with real pools. The bridge already knows how
+to carry a voucher. Neither of those facts does anything for AtomOne
+until there is a mainnet on the other side.</p>
+<p>This produces a situation that should be stated plainly rather than
+dressed up. <strong>AtomOne's next significant milestone is not an
+AtomOne release.</strong> The chain can ship upgrades, tune its
+governance, adjust its validator economics, and none of it changes the
+programmability story. That story advances when gno.land launches, and
+not before.</p>
+<p>For an L1 that is a strange dependency to carry, though it is a
+smaller one than it looks. The hosting model is meant to accept any
+chain that speaks ABCI, so nothing about the architecture requires
+gno.land specifically to be the platform that proves it. What gno.land
+provides is the first real tenant, and first tenants matter enormously,
+because an empty building and a building with one occupant are judged
+very differently. AtomOne is waiting on a demonstration rather than on a
+dependency, and the same company controls the calendar. But calendars
+slip, and the honest version of this section says so.</p>
+<p>The waiting looks nearly over, and the evidence for that is in the
+release notes rather than in anybody's announcements.</p>
+<p>Gno.land has shipped four separate testnets in ten weeks:
+<code>test-13</code> in mid June, <code>topaz</code> in July,
+<code>sapphire</code> in early August, <code>pearl</code> at the end of
+it. Each one a fresh chain rather than an upgrade, each starting from
+zero balances and zero state. That cadence is a team converging, not
+exploring.</p>
+<p>The contents are more specific than the cadence. The headline
+addition in Pearl is genesis vesting accounts: linear unlock schedules,
+cliff schedules, a future start date, and one schedule deliberately
+arranged to straddle genesis itself, shipped with ten test accounts
+covering the full matrix. Nobody builds that for a throwaway network.
+You build it when you are rehearsing a genesis that will carry a real
+token distribution with real lockups. It landed alongside three fixes
+for coins being lost or over-authorized in the send path, a governance
+allowlist lockdown, namespace enforcement live from block one, and a new
+executable harness for security patterns.</p>
+<p>That is what a chain in final hardening looks like from the
+outside.</p>
+<p>Which makes the signal to watch pleasantly falsifiable. The starting
+gun is a single object appearing on <code>atomone-1</code>: the first
+<code>10-gno</code> client instance on mainnet, pointing at whatever
+chain ID gno.land's mainnet claims. Today that query returns nothing.
+The day it returns something, AtomOne has a cryptographic view of a live
+virtual machine for the first time, and every claim in this piece stops
+being architectural and starts being operational.</p>
+<p>After that the sequence is mechanical. Packets start moving on
+mainnet the way they have moved on testnet for months. ATONE and PHOTON
+acquire IBC denominations on gno.land. Contracts that already exist
+begin holding assets that already exist. None of it requires new
+invention, because the invention already happened and was audited on a
+testnet.</p>
+<p>There is one more thing that would have to be true for the full
+design to arrive, though, and it is the piece that has not been
+built.</p>
+<h2 id="the-part-that-has-not-been-built">The part that has not been
+built</h2>
+<p>An IBC bridge lets two chains trade with each other. It does not make
+one a shard of the other.</p>
+<p>Everything described so far is a peer relationship. Two sovereign
+chains, each running its own validators, each independently verifying
+the other's claims, connected by a wire that neither controls. That is a
+genuine achievement and it is not what AtomOne's roadmap describes. The
+roadmap describes gno.land as a consumer chain, which means something
+much stronger: gno.land's blocks secured by AtomOne's validator set,
+rather than by its own.</p>
+<p>The standard way to do that in Cosmos is Interchain Security, and
+AtomOne has ruled it out. Not quietly, and not on technical grounds
+alone.</p>
+<p>The argument comes from Jae Kwon, whose company builds both chains,
+and it arrives in two parts. The first is economic. Classic ICS treated
+validator labour as elastic. It assumed operators asked to run a second
+chain would absorb the servers, the monitoring, the upgrades and the
+on-call burden in exchange for a share of a consumer chain's inflation,
+which might be worth something or might not. The prediction was dozens
+of consumer chains. The outcome, by his own accounting, is two.</p>
+<p>The second part is a security objection, and it targets the fix the
+Cosmos Hub adopted. Partial Set Security lets validators choose which
+consumer chains to secure, which sounds like the obvious remedy to the
+first problem. Kwon's argument is that it introduces a worse one: a
+subset of validators can opt into the same set of chains with the intent
+of attacking all of them at once, and can deliberately avoid chains that
+would attract honest operators. His conclusion is blunt, that
+"permissionless fractional staking is in general insecure."</p>
+<p>Which produces an unusual design principle. The thing to make
+permissionless is not who validates, but what gets deployed. As he puts
+it, what is needed is "not permissionless validator participation (we
+need the opposite), but rather permissionless application chain
+deployment."</p>
+<p>The replacement is called Validation-as-a-Service, and the analogy in
+the source is a cloud provider: package a chain application into a
+container and upload it, so that "just like you can simply deploy a
+linux container image to an Amazon EC2 server, you should be able to
+deploy one to Gaia and AtomOne." Every shard secured by the root chain's
+full validator set. Its central economic move is to stop paying
+validators in hope.</p>
+<p>Under VaaS, a consumer chain pays a fixed fee, denominated in PHOTON,
+for every block it produces. That amount is a parameter, it is
+distributed evenly across validators, and it does not fluctuate with the
+consumer chain's token price or inflation schedule. Validators know what
+running the chain pays before they agree to run it. And if the consumer
+chain's funding runs out, the provider chain instructs it to halt.</p>
+<p>That last clause is the part worth sitting with, because it is
+unusually honest for this industry. Security becomes a metered utility
+with a shutoff valve. A chain that cannot pay for its validators stops
+producing blocks, in the same way an unpaid server gets switched off. No
+subsidy, no expectation that operators will eat the cost for ecosystem
+alignment, no ambiguity about what happens when the money runs out.</p>
+<p>It also does something specific to PHOTON. Its only job today is
+paying for AtomOne's own gas, obtainable only by burning ATONE in a
+one-way conversion. One way that changes is the one described above,
+PHOTON becoming an asset inside a virtual machine. VaaS is the other,
+and the intended scope is broader than a fee token for one chain. The
+design has PHOTON serving as "the exclusive fee-token for transactions
+across all shards, IBC fees, and ICS/VaaS payments, while ATONE powers
+governance and staking." Every shard block becomes a PHOTON payment, and
+stakers earn fees not just from the hub but from everything hosted on
+it. That is a materially different asset from the one that exists
+now.</p>
+<p>None of which has been built.</p>
+<p>What exists is a prototype. <code>ics-poc-1</code> is real, merged
+code: a multiplexer that sits under a single CometBFT consensus layer
+and routes transactions to multiple independent ABCI applications by
+chain ID, with commits for dynamic consumer addition and incentive
+payment. It matches the architecture the roadmap describes,
+containerized consumer shards where the consumer supplies application
+logic and the provider supplies consensus and networking. It is a
+genuine engineering artifact rather than a diagram.</p>
+<p>It has had no commits since January.</p>
+<p>The other thing that exists is preparation on the far side. Gno.land
+merged an architectural decision record that removes two chain-side
+restrictions on validator set updates, and the stated reason is
+explicit: those restrictions would prevent future AtomOne Interchain
+Security provider-validator-set mirroring from applying updates to
+gno.land when AtomOne rotates its own validators. Gno.land has already
+cleared a path for a mechanism that does not exist yet, in shipped code,
+which tells you the plan is real inside both teams even though the
+implementation is not.</p>
+<p>And AtomOne's own roadmap is candid about the status. The phase
+containing validator incentives and the improved ICS model is marked as
+not started.</p>
+<p>So the accurate summary is narrow. There is a diagnosis of why the
+existing approach failed, which is credible and comes from someone with
+standing to make it. There is a proposed replacement with a clear
+economic mechanism and a named target release. There is a working
+prototype of the execution architecture, currently dormant. There is
+preparatory code merged on the consumer side. There is no
+implementation, no timeline anyone has committed to publicly, and no way
+to test the model until there is.</p>
+<p>That is a real gap, and it is worth naming rather than folding into
+the optimism, because the rest of this piece is unusually well evidenced
+and this part is not.</p>
+<p>But it is also the right gap to have. The hard part of connecting two
+chains is proving they can verify each other without anyone being
+trusted, and that part is finished, audited, and has been running across
+four chain resets. What is missing is an economic layer: who pays, how
+much, and what happens when they stop. That is a genuinely difficult
+design problem, and Kwon's critique suggests they understand exactly why
+the last attempt failed. It is also, unlike consensus verification, the
+kind of problem you can iterate on in public without putting anyone's
+funds at risk.</p>
+<p>Cryptography first, economics second, is a defensible order to build
+in.</p>
+<h2 id="what-comes-next">What comes next</h2>
+<p>Most Layer 1s answer "what can you build here" by pointing at their
+own virtual machine. AtomOne answers by pointing at a different chain,
+and the longer you sit with that decision the better it looks.</p>
+<p>A virtual machine is the largest attack surface a blockchain can
+voluntarily adopt. It is where the reentrancy bugs live, the
+upgradeable-proxy disasters, the oracle manipulations, the unbounded
+loops that halt block production. Every chain that hosts one has
+accepted that a stranger's bad code is now, in some sense, its problem.
+AtomOne declined that trade, and in exchange gets to be a chain whose
+failure modes are confined to things it wrote itself.</p>
+<p>Gno.land took the opposite specialization and pushed just as hard.
+Contracts in Go, published as source rather than bytecode, on a VM built
+for the purpose. Neither chain has to be adequate at the other's job,
+and that is the actual elegance here. Two teams inside one company, each
+building the thing they are best at, connected well enough that the
+split costs the user nothing.</p>
+<p>The part that makes this credible rather than merely tidy is that the
+boring work is finished. Somebody sat down and wrote a light client for
+a consensus engine that exactly one chain runs, because no other way
+existed. Somebody paid for an audit that found a way to freeze it with a
+duplicate message, and fixed that before a single token was at risk.
+Thirty-three packets have crossed, four testnets have been destroyed and
+rebuilt underneath the thing, and every outbound packet completed its
+round trip. That is not a demo. That is infrastructure, built quietly,
+in the order a careful engineer would build it.</p>
+<p>The pleasure of following this is how little of it asks for trust.
+Read the module list and see there is no VM. Read the
+<code>allowed_clients</code> parameter and see gno.land was permitted in
+July. Query the acknowledgements on <code>10-gno-16</code> and count the
+confirmations yourself. Check <code>ics-poc-1</code>'s commit history
+and see for yourself that shared security is still a design rather than
+a mechanism. Every claim here is one HTTP request from being confirmed
+or knocked down, which is a rarer property in this industry than it
+should be.</p>
+<p>And the next milestone is a single object appearing where there is
+currently nothing. Today <code>atomone-1</code> holds zero
+<code>10-gno</code> clients, because there is no gno.land mainnet to
+point one at. When that query returns a client, the architecture stops
+being a plan. Packets take the path they have already worn smooth on
+testnet. ATONE and PHOTON acquire denominations inside a virtual machine
+and become assets a program can hold rather than tokens that can only be
+staked or spent on gas. The contracts are already written. The wire is
+already tested. The only missing piece is the chain on the far end.</p>
+<p>Which brings it back to that opening list, the one with the hole in
+it.</p>
+<p>The hole was never a hole. AtomOne knew exactly what it was leaving
+out, and knew where it was putting it instead. When that chain lands, a
+hub that deliberately cannot run a single line of user code is going to
+get access to all of it, and will not have compromised one thing about
+itself to do so.</p>
+<p>That is a good bet, carefully made, and it is about to be tested in
+public.</p>
+  </article>
+</main>
+<footer class="site-footer">
+  <p>The Hub With No VM</p>
+</footer>
+</body>
+</html>
